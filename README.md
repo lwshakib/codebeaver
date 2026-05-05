@@ -1,21 +1,23 @@
-# Next.js template
+# CodeBeaver AI
 
-This is a Next.js template with shadcn/ui.
+CodeBeaver is your AI Senior Software Engineer. It automatically indexes your codebase to understand complex interactions and provides precise, actionable feedback on every Pull Request.
 
-## Adding components
+## Features
 
-To add components to your app, run the following command:
+- **Zero Configuration**: Just install the GitHub App and start shipping.
+- **Lazy Indexing**: Only indexes repositories when the first PR arrives to save resources.
+- **Semantic Analysis**: Deep understanding of your codebase using vector embeddings.
+- **Elite Reviews**: High-quality feedback powered by Gemini 3.
+
+## Getting Started
+
+1. **Sign Up**: Log in with your GitHub account.
+2. **Install App**: Connect the CodeBeaver GitHub App to your organization.
+3. **Open PR**: Push code and open a PR—the AI will handle the rest.
+
+## Development
 
 ```bash
-npx shadcn@latest add button
-```
-
-This will place the ui components in the `components` directory.
-
-## Using components
-
-To use the components in your app, import them as follows:
-
-```tsx
-import { Button } from "@/components/ui/button";
+npm install
+npm run dev
 ```
