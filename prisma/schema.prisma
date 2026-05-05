@@ -21,7 +21,10 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   sessions      Session[]
-  accounts      Account[]
+  onboardingCompleted Boolean  @default(false)
+  githubInstallationId String?
+  accounts             Account[]
+  repositories         Repository[]
 
   @@unique([email])
   @@map("user")
@@ -73,4 +76,44 @@ model Verification {
 
   @@index([identifier])
   @@map("verification")
+}
+
+model Repository {
+  id       String @id @default(cuid())
+  githubId BigInt @unique
+  name     String
+  owner    String
+  fullName String
+  url      String
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  indexingStatus String @default("not_indexed") // not_indexed | indexing | indexed
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  reviews Review[]
+
+  @@index([userId])
+  @@map("repository")
+}
+
+model Review {
+  id           String     @id @default(cuid())
+  repositoryId String
+  repository   Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+
+  prNumber Int
+  prTitle  String
+  prUrl    String
+  review   String @db.Text
+
+  status String @default("completed") // completed | failed | pending
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([repositoryId])
+  @@map("review")
 }
