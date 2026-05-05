@@ -1,0 +1,327 @@
+import { env } from "@/lib/env";
+import { Octokit } from "@octokit/rest";
+import { App } from "octokit";
+import { Pinecone as PineconeClient } from "@pinecone-database/pinecone";
+import { generateEmbeddings, generateBatchEmbeddings } from "@/llm";
+import prisma from "@/lib/prisma";
+import { inngest } from "./client";
+
+export const pinecone = new PineconeClient({
+  apiKey: env.PINECONE_API_KEY!,
+});
+
+export const pineconeIndex = pinecone.Index(env.PINECONE_INDEX!);
+
+/**
+ * Gets a GitHub App installation token for the given installation ID.
+ */
+export async function getGitHubInstallationToken(installationId: string) {
+  const app = new App({
+    appId: env.GITHUB_APP_ID!,
+    privateKey: env.GITHUB_APP_PRIVATE_KEY!,
+  });
+
+  const octokit = await app.getInstallationOctokit(Number(installationId));
+  const { data } = await octokit.request("POST /app/installations/{installation_id}/access_tokens", {
+    installation_id: Number(installationId),
+  });
+
+  return data.token;
+}
+
+/**
+ * Generates an embedding vector for the given text.
+ */
+export async function generateEmbedding(text: string): Promise<number[]> {
+  return generateEmbeddings(text);
+}
+
+/**
+ * Recursively fetches all file contents from a GitHub repository.
+ */
+export const getRepoFileContents = async (
+  token: string,
+  owner: string,
+  repo: string,
+  path: string = ""
+) => {
+  const octokit = new Octokit({
+    auth: token,
+  });
+
+  const { data } = await octokit.repos.getContent({
+    owner,
+    repo,
+    path,
+  });
+
+  if (!Array.isArray(data)) {
+    if (data.type === "file" && data.content) {
+      return [
+        {
+          path: data.path,
+          content: Buffer.from(data.content, "base64").toString("utf-8"),
+        },
+      ];
+    }
+    return [];
+  }
+
+  let files: { path: string; content: string }[] = [];
+
+  for (const item of data) {
+    if (item.type === "file") {
+      const { data: fileData } = await octokit.repos.getContent({
+        owner,
+        repo,
+        path: item.path,
+      });
+      if (
+        !Array.isArray(fileData) &&
+        fileData.type === "file" &&
+        fileData.content
+      ) {
+        const BINARY_FILE_REGEX = /\.(png|jpe?g|gif|svg|ico|pdf|zip|tar|gz)$/i;
+
+        if (!BINARY_FILE_REGEX.test(item.path)) {
+          files.push({
+            path: item.path,
+            content: Buffer.from(fileData.content, "base64").toString("utf-8"),
+          });
+        }
+      }
+    } else if (item.type === "dir") {
+      const subFiles = await getRepoFileContents(token, owner, repo, item.path);
+      files = files.concat(subFiles);
+    }
+  }
+
+  return files;
+};
+
+export type CodeFile = {
+  path: string;
+  content: string;
+};
+
+/**
+ * Indexes a codebase in Pinecone.
+ */
+export async function indexCodebase(
+  repoId: string,
+  files: CodeFile[]
+): Promise<void> {
+  console.log(`Starting indexing for ${repoId} with ${files.length} files`);
+
+  const vectors: any[] = [];
+
+  const preparedFiles = files.map((file) => {
+    const contentWithHeader = `File: ${file.path}\n\n${file.content}`;
+    const truncatedContent = contentWithHeader.slice(0, 8000);
+    return {
+      path: file.path,
+      truncatedContent,
+    };
+  });
+
+  try {
+    const allContents = preparedFiles.map((f) => f.truncatedContent);
+    const results = await generateBatchEmbeddings(allContents);
+
+    results.forEach((embedding, index) => {
+      const file = preparedFiles[index];
+      vectors.push({
+        id: `${repoId}-${file.path.replace(/\//g, "_")}`,
+        values: embedding,
+        metadata: {
+          repoId,
+          path: file.path,
+          content: file.truncatedContent,
+        },
+      });
+    });
+  } catch (error) {
+    console.error(`Failed to generate embeddings for codebase: ${repoId}`, error);
+  }
+
+  if (vectors.length > 0) {
+    const batchSize = 100;
+
+    for (let i = 0; i < vectors.length; i += batchSize) {
+      const batch = vectors.slice(i, i + batchSize);
+      try {
+        await pineconeIndex.upsert({ records: batch });
+      } catch (error) {
+        console.error(`Failed to upsert batch starting at index ${i}`, error);
+        throw error;
+      }
+    }
+
+    console.log(`Successfully indexed ${vectors.length} files for ${repoId}`);
+  }
+}
+
+/**
+ * Retrieves relevant code context from Pinecone.
+ */
+export async function retrieveContext(
+  query: string,
+  repoId: string,
+  topK: number = 5
+): Promise<string[]> {
+  const embedding = await generateEmbedding(query);
+
+  const results = await pineconeIndex.query({
+    vector: embedding,
+    filter: { repoId },
+    topK,
+    includeMetadata: true,
+  });
+
+  return results.matches
+    .map((match) => match.metadata?.content as string | undefined)
+    .filter((content): content is string => Boolean(content));
+}
+
+export async function reviewPullRequest(
+  owner: string,
+  repo: string,
+  prNumber: number
+) {
+  try {
+    const repository = await prisma.repository.findFirst({
+      where: {
+        owner,
+        name: repo,
+      },
+      include: {
+        user: {
+          include: {
+            accounts: {
+              where: {
+                providerId: "github",
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!repository) {
+      throw new Error(`Repository ${owner}/${repo} not found in database.`);
+    }
+
+    let token: string | undefined;
+
+    if (repository.user.githubInstallationId) {
+      token = await getGitHubInstallationToken(repository.user.githubInstallationId);
+    } else {
+      const githubAccount = repository.user.accounts[0];
+      token = githubAccount?.accessToken || undefined;
+    }
+
+    if (!token) {
+      throw new Error("No GitHub access token or installation ID found");
+    }
+
+    await inngest.send({
+      name: "pr.review.requested",
+      data: {
+        owner,
+        repository: repo,
+        prNumber,
+        userId: repository.userId,
+      },
+    });
+
+    return {
+      success: true,
+      message: "Review queued",
+    };
+  } catch (error) {
+    console.error("Error in reviewPullRequest helper:", error);
+    throw error;
+  }
+}
+
+export async function getPullRequestDiff(
+  token: string,
+  owner: string,
+  repo: string,
+  prNumber: number
+) {
+  const octokit = new Octokit({
+    auth: token,
+  });
+
+  const { data: pullRequest } = await octokit.pulls.get({
+    owner,
+    repo,
+    pull_number: prNumber,
+  });
+
+  const { data: diff } = await octokit.request(
+    "GET /repos/{owner}/{repo}/pulls/{pull_number}",
+    {
+      owner,
+      repo,
+      pull_number: prNumber,
+      headers: {
+        accept: "application/vnd.github.v3.diff",
+      },
+    }
+  );
+
+  return {
+    title: pullRequest.title,
+    diff: diff as unknown as string,
+    description: pullRequest.body ?? "",
+  };
+}
+
+export async function postPullRequestComment(
+  token: string,
+  owner: string,
+  repo: string,
+  prNumber: number,
+  comment: string
+) {
+  const octokit = new Octokit({
+    auth: token,
+  });
+
+  await octokit.issues.createComment({
+    owner,
+    repo,
+    issue_number: prNumber,
+    body: comment,
+  });
+}
+
+export async function createPullRequestReview(
+  token: string,
+  owner: string,
+  repo: string,
+  prNumber: number,
+  body: string,
+  comments: { path: string; line: number; body: string }[]
+) {
+  const octokit = new Octokit({
+    auth: token,
+  });
+
+  await octokit.pulls.createReview({
+    owner,
+    repo,
+    pull_number: prNumber,
+    body,
+    event: "COMMENT",
+    comments: comments.map((c) => ({
+      path: c.path,
+      line: c.line,
+      body: c.body,
+      side: "RIGHT",
+    })),
+  });
+}
+
