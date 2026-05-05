@@ -91,7 +91,7 @@ export default async function RepositoriesPage({
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Repositories</h1>
-          <p className="mt-1 text-sm text-muted-foreground font-medium">List of repositories accessible to PulseGrid.</p>
+          <p className="mt-1 text-sm text-muted-foreground font-medium">List of repositories accessible to CodeBeaver.</p>
         </div>
         <div className="flex items-center gap-3">
           <Button variant="outline" className="h-9 border-border bg-background text-xs font-semibold text-muted-foreground hover:bg-accent hover:text-accent-foreground">

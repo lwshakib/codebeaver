@@ -9,7 +9,7 @@ export default function SignUpPage() {
     <div className="space-y-10">
       <div className="text-center">
         <h2 className="text-2xl font-semibold tracking-tight text-white">
-          Join PulseGrid
+          Join CodeBeaver
         </h2>
         <p className="mt-2 text-sm font-medium text-zinc-500">
           Ship higher-quality code with automated reviews.
@@ -78,7 +78,7 @@ export default function SignUpPage() {
       </div>
 
       <div className="text-center text-[10px] font-medium leading-relaxed text-zinc-600">
-        By signing up, you agree to the <a href="#" className="text-zinc-500 underline underline-offset-2">Terms of Use</a> and <a href="#" className="text-zinc-500 underline underline-offset-2">Privacy Policy</a> applicable to PulseGrid.
+        By signing up, you agree to the <a href="#" className="text-zinc-500 underline underline-offset-2">Terms of Use</a> and <a href="#" className="text-zinc-500 underline underline-offset-2">Privacy Policy</a> applicable to CodeBeaver.
       </div>
     </div>
   )

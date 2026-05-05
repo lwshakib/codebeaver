@@ -1,5 +1,8 @@
 import { createAuthClient } from 'better-auth/react';
 
+
+
+
 /**
  * Client-side authentication client for Better Auth.
  * Used in React components to interact with the authentication system.

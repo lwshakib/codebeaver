@@ -18,7 +18,7 @@ import {
   User as UserIcon,
   ChevronRight
 } from "lucide-react"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { useTheme } from "next-themes"
 import { authClient } from "@/lib/auth-client"
 import { useState, useEffect } from "react"
@@ -40,10 +40,19 @@ export default function MainLayout({
 }: {
   children: React.ReactNode
 }) {
+  const router = useRouter()
   const pathname = usePathname()
   const { setTheme, theme } = useTheme()
-  const { data: session } = authClient.useSession()
+  const { data: session, isPending } = authClient.useSession()
   const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null)
+
+  // Onboarding redirect logic
+  useEffect(() => {
+    const user = session?.user as any;
+    if (!isPending && user && !user.onboardingCompleted) {
+      router.push("/onboarding")
+    }
+  }, [session, isPending, router])
 
   const pageTitle = pathname.startsWith('/account') ? 'Account' : 'Repositories'
 

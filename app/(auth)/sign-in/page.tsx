@@ -9,7 +9,7 @@ export default function SignInPage() {
     <div className="space-y-10">
       <div className="text-center">
         <h2 className="text-2xl font-semibold tracking-tight text-white">
-          Sign into PulseGrid
+          Sign into CodeBeaver
         </h2>
         <p className="mt-2 text-sm font-medium text-zinc-500">
           Welcome back, let's start reviewing.
@@ -68,7 +68,7 @@ export default function SignInPage() {
       </div>
 
       <div className="text-center text-sm font-medium text-zinc-500">
-        New to PulseGrid?{" "}
+        New to CodeBeaver?{" "}
         <Link 
           href="/sign-up" 
           className="text-zinc-100 underline underline-offset-4 transition hover:text-white"
@@ -78,7 +78,7 @@ export default function SignInPage() {
       </div>
 
       <div className="text-center text-[10px] font-medium leading-relaxed text-zinc-600">
-        By continuing, you agree to the <a href="#" className="text-zinc-500 underline underline-offset-2">Terms of Use</a> and <a href="#" className="text-zinc-500 underline underline-offset-2">Privacy Policy</a> applicable to PulseGrid.
+        By continuing, you agree to the <a href="#" className="text-zinc-500 underline underline-offset-2">Terms of Use</a> and <a href="#" className="text-zinc-500 underline underline-offset-2">Privacy Policy</a> applicable to CodeBeaver.
       </div>
     </div>
   )

@@ -1,4 +1,5 @@
-import { betterAuth, type User, type Session } from "better-auth";
+import { betterAuth, type User as BetterAuthUser, type Session as BetterAuthSession } from "better-auth";
+
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import prisma from "./prisma";
 import { resend } from "./resend";
@@ -29,6 +30,23 @@ export const auth = betterAuth({
     },
   },
 
+  /**
+   * Database Schema Extensions.
+   * Ensures new fields are included in the session and TypeScript types.
+   */
+  user: {
+    additionalFields: {
+      onboardingCompleted: {
+        type: "boolean",
+        defaultValue: false,
+      },
+      githubInstallationId: {
+        type: "string",
+        required: false,
+      },
+    },
+  },
+
 
   /**
    * Automated email triggers using Better Auth events.
@@ -38,7 +56,7 @@ export const auth = betterAuth({
      * Send a welcome email when a new user is created via social login.
      */
     user: {
-      created: async ({ user }: { user: User }) => {
+      created: async ({ user }: { user: BetterAuthUser }) => {
         if (user.email) {
           try {
             await resend.emails.send({
@@ -60,7 +78,7 @@ export const auth = betterAuth({
      * Send a sign-in notification email when a user logs in.
      */
     session: {
-      created: async ({ user, session }: { user: User; session: Session }) => {
+      created: async ({ user, session }: { user: BetterAuthUser; session: BetterAuthSession }) => {
         if (user.email) {
           try {
             await resend.emails.send({
@@ -82,3 +100,5 @@ export const auth = betterAuth({
     },
   },
 });
+
+

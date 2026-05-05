@@ -14,6 +14,20 @@ const envSchema = z.object({
   
   // Email
   RESEND_API_KEY: z.string().min(1),
+
+  // Pinecone
+  PINECONE_API_KEY: z.string().min(1).optional(),
+  PINECONE_INDEX: z.string().min(1).optional(),
+  
+  // AI (Cloudflare Workers)
+  GLM_WORKER_URL: z.string().url().optional(),
+  CLOUDFLARE_API_KEY: z.string().min(1).optional(),
+  GOOGLE_API_KEY: z.string().min(1).optional(),
+
+  // GitHub App
+  GITHUB_APP_ID: z.string().min(1).optional(),
+  GITHUB_APP_PRIVATE_KEY: z.string().min(1).optional(),
+  GITHUB_APP_WEBHOOK_SECRET: z.string().min(1).optional(),
 });
 
 const envResult = envSchema.safeParse(process.env);
