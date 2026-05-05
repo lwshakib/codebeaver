@@ -81,112 +81,112 @@ export default function MainLayout({
   };
   return (
     <SidebarProvider>
-      <div className="flex h-screen w-full bg-zinc-950 overflow-hidden">
+      <div className="flex h-screen w-full bg-background overflow-hidden">
         <AppSidebar />
-        <SidebarInset className="flex flex-col bg-zinc-950 overflow-hidden">
+        <SidebarInset className="flex flex-col bg-background overflow-hidden">
           {/* Global Header - Sticky */}
-          <header className="sticky top-0 z-40 flex h-14 shrink-0 items-center justify-between border-b border-zinc-900 bg-zinc-950/80 backdrop-blur-md px-6">
+          <header className="sticky top-0 z-40 flex h-14 shrink-0 items-center justify-between border-b border-border bg-background/80 backdrop-blur-md px-6">
             <div className="flex items-center gap-4">
               {/* Mobile Sidebar Trigger */}
               <div className="lg:hidden">
-                <SidebarTrigger className="size-8 rounded-md bg-transparent border-none text-zinc-500 hover:bg-zinc-900 hover:text-zinc-100" />
+                <SidebarTrigger className="size-8 rounded-md bg-transparent border-none text-muted-foreground hover:bg-accent hover:text-accent-foreground" />
               </div>
-              <h2 className="text-sm font-medium text-zinc-100">{pageTitle}</h2>
+              <h2 className="text-sm font-medium text-foreground">{pageTitle}</h2>
             </div>
             
             <div className="flex items-center gap-4">
               <div className="relative hidden sm:flex items-center">
-                <div className="flex h-8 items-center gap-2 rounded-md border border-zinc-800 bg-zinc-900/50 px-3 py-1.5 text-xs text-zinc-500">
+                <div className="flex h-8 items-center gap-2 rounded-md border border-border bg-muted/50 px-3 py-1.5 text-xs text-muted-foreground">
                   <SearchIcon className="size-3.5" />
                   <span>Search</span>
-                  <div className="flex items-center gap-1 ml-4 border-l border-zinc-800 pl-2">
+                  <div className="flex items-center gap-1 ml-4 border-l border-border pl-2">
                     <KeyboardIcon className="size-3" />
                     <span>Ctrl + K</span>
                   </div>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <button className="rounded-md p-1.5 text-zinc-500 hover:bg-zinc-900 hover:text-zinc-100">
+                <button className="rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-accent-foreground">
                   <HelpCircleIcon className="size-4" />
                 </button>
-                <button className="rounded-md p-1.5 text-zinc-500 hover:bg-zinc-900 hover:text-zinc-100">
+                <button className="rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-accent-foreground">
                   <BellIcon className="size-4" />
                 </button>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="relative size-7 rounded-full bg-zinc-800 border border-zinc-700 overflow-hidden outline-none focus:ring-1 focus:ring-zinc-700">
+                    <button className="relative size-7 rounded-full bg-accent border border-border overflow-hidden outline-none focus:ring-1 focus:ring-ring">
                       {profileImageUrl ? (
                         <img src={profileImageUrl} alt="User" className="size-full object-cover" />
                       ) : (
-                        <div className="flex size-full items-center justify-center bg-zinc-900 text-[10px] font-bold text-zinc-400">
+                        <div className="flex size-full items-center justify-center bg-muted text-[10px] font-bold text-muted-foreground">
                           {session?.user?.name?.[0]?.toUpperCase() || 'U'}
                         </div>
                       )}
                     </button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-64 bg-zinc-950 border-zinc-900 p-2 shadow-2xl">
-                    <div className="flex items-center justify-between px-2 py-2">
-                      <div className="flex items-center gap-2">
-                        <Icon icon="lucide:swatchbook" className="size-4 text-zinc-500" />
-                        <span className="text-xs font-bold text-zinc-400">Theme</span>
-                      </div>
-                      <div className="flex items-center gap-1 bg-zinc-900/50 p-1 rounded-lg border border-zinc-900">
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className={cn("size-7 rounded-md", theme === 'light' ? "bg-zinc-800 text-zinc-100" : "text-zinc-500 hover:text-zinc-100")}
-                          onClick={() => setTheme('light')}
-                        >
-                          <Sun className="size-3.5" />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className={cn("size-7 rounded-md", theme === 'dark' ? "bg-zinc-800 text-zinc-100" : "text-zinc-500 hover:text-zinc-100")}
-                          onClick={() => setTheme('dark')}
-                        >
-                          <Moon className="size-3.5" />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className={cn("size-7 rounded-md", theme === 'system' ? "bg-zinc-800 text-zinc-100" : "text-zinc-500 hover:text-zinc-100")}
-                          onClick={() => setTheme('system')}
-                        >
-                          <Monitor className="size-3.5" />
-                        </Button>
-                      </div>
-                    </div>
-
-                    <DropdownMenuSeparator className="bg-zinc-900 my-1" />
-
-                    <DropdownMenuItem 
-                      onClick={handleLogout}
-                      className="flex items-center gap-2 p-2 rounded-lg cursor-pointer text-zinc-500 hover:text-red-500 focus:text-red-500 focus:bg-red-500/10"
-                    >
-                      <LogOut className="size-4" />
-                      <span className="text-xs font-bold">Logout</span>
-                    </DropdownMenuItem>
-
-                    <DropdownMenuSeparator className="bg-zinc-900 my-1" />
-
-                    <DropdownMenuItem asChild className="cursor-pointer focus:bg-zinc-900 focus:text-zinc-100 p-2 rounded-lg mt-1">
+                  <DropdownMenuContent align="end" className="w-64 bg-popover border-border p-2 shadow-2xl">
+                    <DropdownMenuItem asChild className="cursor-pointer focus:bg-accent focus:text-accent-foreground p-2 rounded-lg mb-1">
                       <Link href="/account" className="flex items-center gap-3 w-full">
-                        <div className="size-10 rounded-full bg-zinc-900 border border-zinc-800 overflow-hidden shrink-0">
+                        <div className="size-10 rounded-full bg-muted border border-border overflow-hidden shrink-0">
                           {profileImageUrl ? (
                             <img src={profileImageUrl} alt="User" className="size-full object-cover" />
                           ) : (
-                            <div className="flex size-full items-center justify-center text-xs font-bold text-zinc-400">
+                            <div className="flex size-full items-center justify-center text-xs font-bold text-muted-foreground">
                               {session?.user?.name?.[0]?.toUpperCase() || 'U'}
                             </div>
                           )}
                         </div>
                         <div className="flex flex-col min-w-0 flex-1">
-                          <span className="text-sm font-bold text-zinc-100 truncate">{session?.user?.name}</span>
-                          <span className="text-[10px] font-bold text-orange-500 uppercase tracking-widest">Admin</span>
+                          <span className="text-sm font-bold text-foreground truncate">{session?.user?.email?.split('@')[0] || session?.user?.name}</span>
+                          <span className="text-[10px] font-bold text-primary">Admin</span>
                         </div>
-                        <ChevronRight className="size-4 text-zinc-600" />
+                        <ChevronRight className="size-4 text-muted-foreground" />
                       </Link>
+                    </DropdownMenuItem>
+
+                    <DropdownMenuSeparator className="bg-border my-1" />
+
+                    <div className="flex items-center justify-between px-2 py-1">
+                      <div className="flex items-center gap-2">
+                        <Icon icon="lucide:swatchbook" className="size-4 text-muted-foreground" />
+                        <span className="text-sm font-medium text-foreground">Theme</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className={cn("size-8 rounded-md", theme === 'light' ? "text-foreground bg-accent" : "text-muted-foreground hover:text-foreground")}
+                          onClick={() => setTheme('light')}
+                        >
+                          <Sun className="size-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className={cn("size-8 rounded-md", theme === 'dark' ? "text-foreground bg-accent" : "text-muted-foreground hover:text-foreground")}
+                          onClick={() => setTheme('dark')}
+                        >
+                          <Moon className="size-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className={cn("size-8 rounded-md", theme === 'system' ? "text-foreground bg-accent" : "text-muted-foreground hover:text-foreground")}
+                          onClick={() => setTheme('system')}
+                        >
+                          <Monitor className="size-4" />
+                        </Button>
+                      </div>
+                    </div>
+
+                    <DropdownMenuSeparator className="bg-border my-1" />
+
+                    <DropdownMenuItem 
+                      onClick={handleLogout}
+                      className="flex items-center gap-2 p-2 rounded-lg cursor-pointer text-foreground hover:text-foreground focus:text-foreground focus:bg-accent"
+                    >
+                      <LogOut className="size-4 text-muted-foreground" />
+                      <span className="text-sm font-medium">Logout</span>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -210,10 +210,16 @@ export default function MainLayout({
           background: transparent;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: #18181b;
+          background: #e4e4e7;
           border-radius: 10px;
         }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: #18181b;
+        }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: #d4d4d8;
+        }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
           background: #27272a;
         }
       `}</style>

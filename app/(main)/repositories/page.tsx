@@ -36,9 +36,9 @@ export default async function RepositoriesPage({
   if (!account || !account.accessToken) {
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] space-y-4">
-        <h1 className="text-2xl font-bold text-zinc-100">No GitHub account connected</h1>
-        <p className="text-zinc-500">Please sign in with GitHub to view your repositories.</p>
-        <Button asChild className="bg-orange-600 hover:bg-orange-700">
+        <h1 className="text-2xl font-bold text-foreground">No GitHub account connected</h1>
+        <p className="text-muted-foreground">Please sign in with GitHub to view your repositories.</p>
+        <Button asChild className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold">
           <a href="/sign-in">Sign in with GitHub</a>
         </Button>
       </div>
@@ -90,15 +90,15 @@ export default async function RepositoriesPage({
     <div className="space-y-8 max-w-6xl">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-zinc-100">Repositories</h1>
-          <p className="mt-1 text-sm text-zinc-500 font-medium">List of repositories accessible to PulseGrid.</p>
+          <h1 className="text-3xl font-bold text-foreground">Repositories</h1>
+          <p className="mt-1 text-sm text-muted-foreground font-medium">List of repositories accessible to PulseGrid.</p>
         </div>
         <div className="flex items-center gap-3">
-          <Button variant="outline" className="h-9 border-zinc-800 bg-zinc-950 text-xs font-semibold text-zinc-300 hover:bg-zinc-900">
+          <Button variant="outline" className="h-9 border-border bg-background text-xs font-semibold text-muted-foreground hover:bg-accent hover:text-accent-foreground">
             <RefreshCwIcon className="mr-2 size-3.5" />
             Sync Repositories
           </Button>
-          <Button className="h-9 bg-orange-600 text-xs font-bold text-white hover:bg-orange-700">
+          <Button className="h-9 bg-primary text-xs font-bold text-primary-foreground hover:bg-primary/90">
             <PlusIcon className="mr-2 size-4" />
             Add Repositories
           </Button>
@@ -106,7 +106,7 @@ export default async function RepositoriesPage({
       </div>
 
       {error ? (
-        <div className="rounded-lg border border-red-900/50 bg-red-900/10 p-4 text-red-500 text-sm">
+        <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-destructive text-sm">
           {error}
         </div>
       ) : (
@@ -117,40 +117,40 @@ export default async function RepositoriesPage({
               name="search"
               placeholder="Search repositories" 
               defaultValue={search}
-              className="h-10 pl-10 bg-zinc-950 border-zinc-800 text-sm text-zinc-300 placeholder:text-zinc-600 focus-visible:ring-zinc-800"
+              className="h-10 pl-10 bg-background border-border text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-ring"
             />
           </form>
 
-          <div className="rounded-lg border border-zinc-900 overflow-hidden">
+          <div className="rounded-lg border border-border overflow-hidden shadow-sm">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-zinc-900 bg-zinc-950/50">
-                  <th className="px-6 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+                <tr className="border-b border-border bg-muted/50">
+                  <th className="px-6 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     <div className="flex items-center gap-2">
                       Repository
-                      <RefreshCwIcon className="size-3 text-zinc-600" />
+                      <RefreshCwIcon className="size-3 text-muted-foreground" />
                     </div>
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-900 bg-zinc-950">
+              <tbody className="divide-y divide-border bg-background">
                 {repositories.length > 0 ? (
                   repositories.map((repo) => (
-                    <tr key={repo.id} className="group hover:bg-zinc-900/30 transition-colors">
+                    <tr key={repo.id} className="group hover:bg-muted/50 transition-colors">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-4">
                           <a 
                             href={repo.html_url} 
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className="text-[14px] font-medium text-zinc-300 group-hover:text-white transition-colors"
+                            className="text-[14px] font-medium text-foreground/80 group-hover:text-foreground transition-colors"
                           >
                             {repo.full_name}
                           </a>
                           {repo.private ? (
-                            <span className="rounded-full bg-zinc-900 px-2 py-0.5 text-[9px] font-bold text-orange-500/80 border border-orange-500/20 uppercase tracking-wide">Private</span>
+                            <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[9px] font-bold text-primary border border-primary/20 uppercase tracking-wide">Private</span>
                           ) : (
-                            <span className="rounded-full bg-zinc-900 px-2 py-0.5 text-[9px] font-bold text-zinc-500 border border-zinc-800 uppercase tracking-wide">Public</span>
+                            <span className="rounded-full bg-muted px-2 py-0.5 text-[9px] font-bold text-muted-foreground border border-border uppercase tracking-wide">Public</span>
                           )}
                         </div>
                       </td>
@@ -158,7 +158,7 @@ export default async function RepositoriesPage({
                   ))
                 ) : (
                   <tr>
-                    <td className="px-6 py-12 text-center text-zinc-500 text-sm italic">
+                    <td className="px-6 py-12 text-center text-muted-foreground text-sm italic">
                       {search ? "No repositories matching your search." : "No repositories found."}
                     </td>
                   </tr>
@@ -169,33 +169,33 @@ export default async function RepositoriesPage({
 
           {/* Pagination */}
           <div className="flex items-center justify-end gap-8 pt-4">
-            <div className="flex items-center gap-4 text-xs font-medium text-zinc-500">
+            <div className="flex items-center gap-4 text-xs font-medium text-muted-foreground">
               <span>Rows per page</span>
-              <div className="flex items-center gap-2 rounded-md border border-zinc-900 bg-zinc-950 px-2 py-1 cursor-default">
+              <div className="flex items-center gap-2 rounded-md border border-border bg-background px-2 py-1 cursor-default shadow-sm">
                 <span>10</span>
-                <ChevronDown className="size-3 text-zinc-600" />
+                <ChevronDown className="size-3 text-muted-foreground" />
               </div>
             </div>
             
             <div className="flex items-center gap-6">
-              <span className="text-xs font-medium text-zinc-500">Page {page} of {totalPages || 1}</span>
+              <span className="text-xs font-medium text-muted-foreground">Page {page} of {totalPages || 1}</span>
               <div className="flex items-center gap-1">
-                <Button variant="ghost" size="icon" asChild disabled={page <= 1} className="size-8 text-zinc-500 hover:text-white hover:bg-zinc-900 disabled:opacity-30">
+                <Button variant="ghost" size="icon" asChild disabled={page <= 1} className="size-8 text-muted-foreground hover:text-foreground hover:bg-accent disabled:opacity-30">
                   <Link href={`/repositories?page=1${search ? `&search=${search}` : ""}`}>
                     <ChevronsLeftIcon className="size-4" />
                   </Link>
                 </Button>
-                <Button variant="ghost" size="icon" asChild disabled={page <= 1} className="size-8 text-zinc-500 hover:text-white hover:bg-zinc-900 disabled:opacity-30">
+                <Button variant="ghost" size="icon" asChild disabled={page <= 1} className="size-8 text-muted-foreground hover:text-foreground hover:bg-accent disabled:opacity-30">
                   <Link href={`/repositories?page=${Math.max(1, page - 1)}${search ? `&search=${search}` : ""}`}>
                     <ChevronLeftIcon className="size-4" />
                   </Link>
                 </Button>
-                <Button variant="ghost" size="icon" asChild disabled={page >= totalPages} className="size-8 text-zinc-500 hover:text-white hover:bg-zinc-900 disabled:opacity-30">
+                <Button variant="ghost" size="icon" asChild disabled={page >= totalPages} className="size-8 text-muted-foreground hover:text-foreground hover:bg-accent disabled:opacity-30">
                   <Link href={`/repositories?page=${Math.min(totalPages, page + 1)}${search ? `&search=${search}` : ""}`}>
                     <ChevronRightIcon className="size-4" />
                   </Link>
                 </Button>
-                <Button variant="ghost" size="icon" asChild disabled={page >= totalPages} className="size-8 text-zinc-500 hover:text-white hover:bg-zinc-900 disabled:opacity-30">
+                <Button variant="ghost" size="icon" asChild disabled={page >= totalPages} className="size-8 text-muted-foreground hover:text-foreground hover:bg-accent disabled:opacity-30">
                   <Link href={`/repositories?page=${totalPages}${search ? `&search=${search}` : ""}`}>
                     <ChevronsRightIcon className="size-4" />
                   </Link>
