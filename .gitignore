@@ -30,7 +30,11 @@ pnpm-debug.log*
 
 # env files
 .env*.local
+.env*
+!.env.example
 
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+arcosys-web
+/generated/prisma
