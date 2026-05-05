@@ -104,12 +104,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <div className="rounded-xl border border-border bg-card/40 p-4 shadow-sm group-data-[collapsible=icon]:hidden">
           <div className="flex items-center justify-between">
             <span className="text-[13px] font-medium text-card-foreground">
-              Get started with <span className="text-primary">PulseGrid</span>
+              Get started with <span className="text-primary">CodeBeaver</span>
             </span>
             <ArrowRight className="size-3.5 text-muted-foreground" />
           </div>
           <p className="mt-1 text-[11px] text-muted-foreground">
-            Up Next: Personalize PulseGrid
+            Up Next: Personalize CodeBeaver
           </p>
         </div>
         <div className="flex w-full items-center justify-start group-data-[collapsible=icon]:justify-center px-1">
