@@ -14,8 +14,10 @@ async function embed(text: string, type: "query" | "document"): Promise<number[]
 
     const response = await genAI.models.embedContent({
       model: EMBEDDING_MODEL_ID,
-      contents: formattedText,
-      outputDimensionality: 768,
+      contents: [formattedText],
+      config: {
+        outputDimensionality: 768,
+      },
     });
 
     if (!response.embeddings || response.embeddings.length === 0 || !response.embeddings[0].values) {
