@@ -12,7 +12,7 @@ CodeBeaver is your AI Senior Software Engineer. It automatically indexes your co
 ## Getting Started
 
 1. **Sign Up**: Log in with your GitHub account.
-2. **Install App**: Connect the CodeBeaver GitHub App to your organization.
+2. **Install App**: Connect the CodeBeaver GitHub App to your organization. See the [GitHub App Setup Guide](./github-app-setup.md) for details.
 3. **Open PR**: Push code and open a PR—the AI will handle the rest.
 
 ## Development
