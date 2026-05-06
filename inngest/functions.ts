@@ -199,8 +199,6 @@ export const generateReviewTask = inngest.createFunction(
     });
 
     // If description is empty, generate and update it
-
-    // If description is empty, generate and update it
     if (!description || description.trim() === "") {
       await step.run("generate-and-update-description", async () => {
         const { text: generatedDescription } = await generateText({
