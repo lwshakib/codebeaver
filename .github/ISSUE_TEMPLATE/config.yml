@@ -1,0 +1,12 @@
+---
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Ask a Question
+    url: https://github.com/lwshakib/codebeaver/discussions
+    about: "Have a question? Start a discussion instead of opening an issue"
+  - name: 📖 Documentation
+    url: https://docs.codebeaver.dev
+    about: "Check our documentation for help"
+  - name: 💌 Email Support
+    url: mailto:support@codebeaver.dev
+    about: "Need direct support? Reach out to our team"
