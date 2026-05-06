@@ -30,23 +30,13 @@ async function embed(text: string, type: "query" | "document"): Promise<number[]
 }
 
 /**
- * Generates an embedding for a single search query.
- * Uses the 'task: search result' prefix as recommended for asymmetric retrieval.
+ * Generates an embedding for a string (query or document).
+ * Uses the appropriate prefix as recommended for asymmetric retrieval.
  *
- * @param text - The query string to embed.
+ * @param text - The string to embed.
+ * @param type - The type of embedding (query or document).
  * @returns A promise resolving to the coordinate array.
  */
-export const generateEmbeddings = async (text: string): Promise<number[]> => {
-  return await embed(text, "query");
-};
-
-/**
- * Generates embeddings for a list of strings.
- * Processes documents individually to maintain the expected one-to-one mapping for indexing.
- *
- * @param texts - Array of strings to embed.
- * @returns A promise resolving to an array of coordinate arrays (embeddings).
- */
-export const generateBatchEmbeddings = async (texts: string[]): Promise<number[][]> => {
-  return await Promise.all(texts.map((text) => embed(text, "document")));
+export const generateEmbeddings = async (text: string, type: "query" | "document" = "query"): Promise<number[]> => {
+  return await embed(text, type);
 };
