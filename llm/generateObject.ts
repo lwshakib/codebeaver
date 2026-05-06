@@ -25,27 +25,24 @@ export async function generateObject<T>({
   const history = messages.slice(0, -1);
 
   try {
-    const model = genAI.getGenerativeModel({
-      model: CHAT_MODEL_ID,
+    const config = {
       systemInstruction,
-    });
-
-    const generationConfig = {
       temperature,
       responseMimeType: "application/json",
       responseJsonSchema: rawSchema || (outputSchema ? zodToJsonSchema(outputSchema as any) : undefined),
     };
 
-    const result = await model.generateContent({
+    const result = await genAI.models.generateContent({
+      model: CHAT_MODEL_ID,
       contents: messages.map(m => ({
         role: m.role === "user" ? "user" : "model",
         parts: m.parts,
       })),
-      generationConfig,
+      config,
     });
 
-    const response = result.response;
-    const text = response.text();
+    const response = result;
+    const text = response.text;
     
     if (!text) {
       throw new Error("No text returned from Gemini API");
