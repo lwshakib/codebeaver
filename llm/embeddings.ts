@@ -1,5 +1,8 @@
 import { genAI } from './client';
-import { EMBEDDING_MODEL_ID } from './constants';
+import { 
+  EMBEDDING_MODEL_ID, 
+  GEMINI_EMBEDDING_DIMENSIONALITY
+} from './constants';
 
 /**
  * Internal helper to call the Gemini Embedding API.
@@ -16,7 +19,7 @@ async function embed(text: string, type: "query" | "document"): Promise<number[]
       model: EMBEDDING_MODEL_ID,
       contents: [formattedText],
       config: {
-        outputDimensionality: 768,
+        outputDimensionality: GEMINI_EMBEDDING_DIMENSIONALITY,
       },
     });
 
