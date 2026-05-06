@@ -186,7 +186,8 @@ export async function retrieveContext(
 export async function reviewPullRequest(
   owner: string,
   repo: string,
-  prNumber: number
+  prNumber: number,
+  installationId?: number
 ) {
   try {
     const repository = await prisma.repository.findFirst({
@@ -207,16 +208,47 @@ export async function reviewPullRequest(
       },
     });
 
+    let userId: string;
+    let githubInstallationId: string | null = null;
+    let githubAccount: any = null;
+
     if (!repository) {
-      throw new Error(`Repository ${owner}/${repo} not found in database.`);
+      // Auto-discovery: find user by installation ID if repo is not in DB
+      if (!installationId) {
+        throw new Error(`Repository ${owner}/${repo} not found in database and no installation ID provided.`);
+      }
+
+      const user = await prisma.user.findFirst({
+        where: {
+          githubInstallationId: String(installationId),
+        },
+        include: {
+          accounts: {
+            where: {
+              providerId: "github",
+            },
+          },
+        },
+      });
+
+      if (!user) {
+        throw new Error(`No user found for installation ID ${installationId}. Please ensure you have signed up.`);
+      }
+
+      userId = user.id;
+      githubInstallationId = user.githubInstallationId;
+      githubAccount = user.accounts[0];
+    } else {
+      userId = repository.userId;
+      githubInstallationId = repository.user.githubInstallationId;
+      githubAccount = repository.user.accounts[0];
     }
 
     let token: string | undefined;
 
-    if (repository.user.githubInstallationId) {
-      token = await getGitHubInstallationToken(repository.user.githubInstallationId);
+    if (githubInstallationId) {
+      token = await getGitHubInstallationToken(githubInstallationId);
     } else {
-      const githubAccount = repository.user.accounts[0];
       token = githubAccount?.accessToken || undefined;
     }
 
@@ -230,7 +262,7 @@ export async function reviewPullRequest(
         owner,
         repository: repo,
         prNumber,
-        userId: repository.userId,
+        userId,
       },
     });
 
