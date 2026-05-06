@@ -77,17 +77,30 @@ export const generateReviewTask = inngest.createFunction(
     const { repository, owner, userId, prNumber } = event.data;
     
     const token = await step.run("get-token", async () => {
-      const account = await prisma.account.findFirst({
-        where: {
-          userId,
-          providerId: "github",
-        },
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
       });
 
-      if (!account?.accessToken) {
-        throw new Error("No access token found");
+      let token: string | undefined;
+
+      if (user?.githubInstallationId) {
+        const { getGitHubInstallationToken } = await import("./helpers");
+        token = await getGitHubInstallationToken(user.githubInstallationId);
+      } else {
+        const account = await prisma.account.findFirst({
+          where: {
+            userId,
+            providerId: "github",
+          },
+        });
+        token = account?.accessToken || undefined;
       }
-      return account.accessToken;
+
+      if (!token) {
+        throw new Error("No GitHub access token or installation ID found");
+      }
+
+      return token;
     });
 
     await step.run("ensure-indexed", async () => {
