@@ -308,6 +308,7 @@ export async function getPullRequestDiff(
     title: pullRequest.title,
     diff: diff as unknown as string,
     description: pullRequest.body ?? "",
+    sha: pullRequest.head.sha,
   };
 }
 
@@ -335,6 +336,7 @@ export async function createPullRequestReview(
   owner: string,
   repo: string,
   prNumber: number,
+  commitId: string,
   body: string,
   comments: { path: string; line: number; body: string }[]
 ) {
@@ -346,14 +348,33 @@ export async function createPullRequestReview(
     owner,
     repo,
     pull_number: prNumber,
+    commit_id: commitId,
     body,
     event: "COMMENT",
     comments: comments.map((c) => ({
       path: c.path,
       line: c.line,
       body: c.body,
-      side: "RIGHT",
     })),
+  });
+}
+
+export async function updatePullRequestDescription(
+  token: string,
+  owner: string,
+  repo: string,
+  prNumber: number,
+  body: string
+) {
+  const octokit = new Octokit({
+    auth: token,
+  });
+
+  await octokit.pulls.update({
+    owner,
+    repo,
+    pull_number: prNumber,
+    body,
   });
 }
 

@@ -7,12 +7,14 @@ import {
   postPullRequestComment,
   createPullRequestReview,
   retrieveContext,
+  updatePullRequestDescription,
 } from "./helpers";
 import { 
   generateText, 
   generateObject, 
   PR_REVIEW_PROMPT, 
-  PR_SUMMARY_PROMPT 
+  PR_SUMMARY_PROMPT,
+  PR_DESCRIPTION_PROMPT
 } from "@/llm";
 import { z } from "zod";
 
@@ -168,7 +170,7 @@ export const generateReviewTask = inngest.createFunction(
       }
     });
 
-    const { diff, title, description } = await step.run(
+    const { diff, title, description, sha } = await step.run(
       "fetch-pr-data",
       async () => {
         return await getPullRequestDiff(
@@ -179,6 +181,29 @@ export const generateReviewTask = inngest.createFunction(
         );
       }
     );
+
+    // If description is empty, generate and update it
+    if (!description || description.trim() === "") {
+      await step.run("generate-and-update-description", async () => {
+        const { text: generatedDescription } = await generateText({
+          systemInstruction: PR_DESCRIPTION_PROMPT,
+          messages: [
+            { 
+              role: "user", 
+              parts: [{ text: `PR Title: ${title}\n\nDiff:\n${diff}` }] 
+            },
+          ],
+        });
+
+        await updatePullRequestDescription(
+          token,
+          owner,
+          repository,
+          prNumber,
+          generatedDescription
+        );
+      });
+    }
 
     const context = await step.run("retrieve-context", async () => {
       const query = `${title}\n${description}`;
@@ -241,7 +266,11 @@ ${diff}
 
     await step.run("post-review-feedback", async () => {
       const reviewBody = `# Code Review\n\n${review.overview}`;
-      const inlineComments = review.findings.map((f: any) => ({
+      
+      // Filter out findings that are missing required fields (path or line) to avoid 422 errors
+      const validFindings = review.findings.filter((f: any) => f.path && f.line);
+
+      const inlineComments = validFindings.map((f: any) => ({
         path: f.path,
         line: f.line,
         body: `**${f.priority}**\n\n${f.explanation}\n\n**Recommendation:**\n${f.suggestion}`,
@@ -252,6 +281,7 @@ ${diff}
         owner,
         repository,
         prNumber,
+        sha,
         reviewBody,
         inlineComments
       );
