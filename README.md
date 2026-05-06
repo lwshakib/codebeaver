@@ -19,5 +19,6 @@ CodeBeaver is your AI Senior Software Engineer. It automatically indexes your co
 
 ```bash
 npm install
+npm run db:migrate
 npm run dev
 ```
