@@ -1,4 +1,4 @@
-<img src="./public/logo.png" alt="CodeBeaver Logo" width="120" height="120" align="left" style="margin-right: 20px; margin-bottom: 20px;">
+<img src="./public/logo.png" alt="CodeBeaver Logo" width="120" height="120">
 
 # CodeBeaver AI - Your AI Senior Software Engineer
 
