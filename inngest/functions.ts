@@ -260,6 +260,18 @@ ${diff}
       await postPullRequestComment(token, owner, repository, prNumber, summary);
     });
 
+    interface ReviewResult {
+      overview: string;
+      findings: {
+        path: string;
+        line: number;
+        priority: string;
+        explanation: string;
+        originalSnippet?: string;
+        suggestedCode?: string;
+      }[];
+    }
+
     const review = await step.run("generate-review-findings", async () => {
       const userPrompt = `PR Title: ${title}\n\nPR Description: ${description}\n\nDiff:\n${diff}\n\nContext:\n${context}`;
       
@@ -292,7 +304,7 @@ ${diff}
         required: ["overview", "findings"]
       };
 
-      const { object } = await generateObject({
+      const { object } = await generateObject<ReviewResult>({
         rawSchema: reviewSchema,
         systemInstruction: PR_REVIEW_PROMPT,
         messages: [
@@ -300,7 +312,7 @@ ${diff}
         ],
       });
       return object;
-    });
+    }) as ReviewResult;
 
     await step.run("post-review-feedback", async () => {
       const reviewBody = `# Code Review\n\n${review.overview}`;
