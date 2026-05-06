@@ -11,7 +11,7 @@ To enable the onboarding flow and repository indexing, you need to create a GitH
 5. **Setup URL**: `http://localhost:3000/onboarding` (Optional, but helpful).
 6. **Webhook**: 
     - **Active**: Check this.
-    - **Webhook URL**: `http://localhost:3000/api/github/webhook` (We will implement this).
+    - **Webhook URL**: `http://localhost:3000/api/webhooks/github` (Handles Pull Request events).
     - **Webhook secret**: Enter a random strong string (Save this for `.env`).
 
 ## Step 2: Permissions

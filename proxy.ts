@@ -8,7 +8,7 @@ import { headers } from 'next/headers';
  * These routes do not require authentication
  * @type {string[]}
  */
-export const publicRoutes = ['/', '/api/inngest'];
+export const publicRoutes = ['/', '/api/inngest', '/api/webhooks/github'];
 
 /**
  * An array of routes that are used for authentication
