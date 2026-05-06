@@ -36,5 +36,5 @@ pnpm-debug.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-arcosys-web
+
 /generated/prisma
