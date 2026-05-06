@@ -344,19 +344,26 @@ export async function createPullRequestReview(
     auth: token,
   });
 
-  await octokit.pulls.createReview({
-    owner,
-    repo,
-    pull_number: prNumber,
-    commit_id: commitId,
-    body,
-    event: "COMMENT",
-    comments: comments.map((c) => ({
-      path: c.path,
-      line: c.line,
-      body: c.body,
-    })),
-  });
+  try {
+    await octokit.rest.pulls.createReview({
+      owner,
+      repo,
+      pull_number: prNumber,
+      commit_id: commitId,
+      body,
+      event: "COMMENT",
+      comments: comments.map((c) => ({
+        path: c.path,
+        line: c.line,
+        body: c.body,
+        side: "RIGHT",
+      })),
+    });
+  } catch (error) {
+    console.error("Failed to create batched review. Falling back to summary only.", error);
+    // If the batched review fails (likely due to line number mismatches), post the summary as a comment at least.
+    await postPullRequestComment(token, owner, repo, prNumber, `${body}\n\n*(Note: Some inline comments could not be posted due to line mapping issues)*`);
+  }
 }
 
 export async function updatePullRequestDescription(
