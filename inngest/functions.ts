@@ -261,18 +261,39 @@ ${diff}
     });
 
     const review = await step.run("generate-review-findings", async () => {
+      const userPrompt = `PR Title: ${title}\n\nPR Description: ${description}\n\nDiff:\n${diff}\n\nContext:\n${context}`;
+      
+      const reviewSchema = {
+        type: "object",
+        properties: {
+          overview: {
+            type: "string",
+            description: "Concise high-level summary of the review findings."
+          },
+          findings: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                path: { type: "string", description: "File path." },
+                line: { type: "number", description: "Line number in the final file version." },
+                priority: { 
+                  type: "string", 
+                  enum: ["High Priority", "Medium Priority", "Low Priority", "Positive Note"] 
+                },
+                explanation: { type: "string", description: "Description of the issue or praise." },
+                originalSnippet: { type: "string", description: "The exact code from the diff to be replaced." },
+                suggestedCode: { type: "string", description: "The corrected code block." }
+              },
+              required: ["path", "line", "priority", "explanation"]
+            }
+          }
+        },
+        required: ["overview", "findings"]
+      };
+
       const { object } = await generateObject({
-        outputSchema: z.object({
-          overview: z.string().describe("Concise high-level summary of the review findings."),
-          findings: z.array(z.object({
-            path: z.string().describe("File path."),
-            line: z.number().describe("Line number in the final file version."),
-            priority: z.enum(["High Priority", "Medium Priority", "Low Priority", "Positive Note"]),
-            explanation: z.string().describe("Description of the issue or praise for the implementation."),
-            originalSnippet: z.string().optional().describe("The exact code snippet from the diff to be replaced."),
-            suggestedCode: z.string().optional().describe("The corrected code block.")
-          }))
-        }),
+        rawSchema: reviewSchema,
         systemInstruction: PR_REVIEW_PROMPT,
         messages: [
           { role: "user", parts: [{ text: userPrompt }] },

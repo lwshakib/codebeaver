@@ -6,11 +6,13 @@ import { CHAT_MODEL_ID } from "./constants";
 export async function generateObject<T>({
   systemInstruction,
   outputSchema,
+  rawSchema,
   messages,
   temperature = 1.0,
 }: {
   systemInstruction?: string;
-  outputSchema: z.Schema<T>;
+  outputSchema?: z.Schema<T>;
+  rawSchema?: any;
   messages: { role: "user" | "model"; parts: { text: string }[] }[];
   temperature?: number;
 }) {
@@ -30,7 +32,7 @@ export async function generateObject<T>({
         systemInstruction,
         temperature,
         responseMimeType: "application/json",
-        responseJsonSchema: zodToJsonSchema(outputSchema as any),
+        responseJsonSchema: rawSchema || (outputSchema ? zodToJsonSchema(outputSchema as any) : undefined),
       },
     });
 
