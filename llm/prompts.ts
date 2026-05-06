@@ -71,11 +71,17 @@ Your response must strictly follow the requested JSON schema:
   - **line**: The specific line number in the new version of the file.
   - **priority**: "High Priority", "Medium Priority", or "Low Priority".
   - **explanation**: A clear description of the issue.
-  - **suggestion**: A concrete recommendation or code fix.
+  - **originalSnippet**: The exact line or block of code from the diff that needs to be replaced.
+  - **suggestedCode**: The complete, corrected version of the code that should replace the originalSnippet.
 </output_format>
 
 <final_instruction>
-Think very hard before answering. Ensure your review is strictly grounded in the provided diff and codebase context. Do not assume information that is not present.
+Think very hard before answering. Ensure your review is strictly grounded in the provided diff and codebase context. 
+
+When providing a **suggestedCode**:
+1. It must be a direct, syntactically correct replacement for the **originalSnippet**.
+2. Maintain the same indentation level as the original code.
+3. Ensure the suggestion is relevant to the project's logic and architecture.
 </final_instruction>
 `;
 export const PR_DESCRIPTION_PROMPT = `

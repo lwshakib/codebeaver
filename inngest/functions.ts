@@ -253,7 +253,8 @@ ${diff}
             line: z.number().describe("Line number in the final file version."),
             priority: z.enum(["High Priority", "Medium Priority", "Low Priority"]),
             explanation: z.string().describe("Description of the issue and its impact."),
-            suggestion: z.string().describe("Recommended fix or solution.")
+            originalSnippet: z.string().describe("The exact code snippet from the diff to be replaced."),
+            suggestedCode: z.string().describe("The corrected code block.")
           }))
         }),
         systemInstruction: PR_REVIEW_PROMPT,
@@ -270,11 +271,19 @@ ${diff}
       // Filter out findings that are missing required fields (path or line) to avoid 422 errors
       const validFindings = review.findings.filter((f: any) => f.path && f.line);
 
-      const inlineComments = validFindings.map((f: any) => ({
-        path: f.path,
-        line: f.line,
-        body: `**${f.priority}**\n\n${f.explanation}\n\n**Recommendation:**\n${f.suggestion}`,
-      }));
+      const inlineComments = validFindings.map((f: any) => {
+        let commentBody = `**${f.priority}**\n\n${f.explanation}`;
+        
+        if (f.suggestedCode) {
+          commentBody += `\n\n**Suggested Change:**\n\`\`\`suggestion\n${f.suggestedCode}\n\`\`\``;
+        }
+
+        return {
+          path: f.path,
+          line: f.line,
+          body: commentBody,
+        };
+      });
 
       await createPullRequestReview(
         token,
