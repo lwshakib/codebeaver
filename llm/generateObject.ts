@@ -25,31 +25,42 @@ export async function generateObject<T>({
   const history = messages.slice(0, -1);
 
   try {
-    const chat = genAI.chats.create({
+    const model = genAI.getGenerativeModel({
       model: CHAT_MODEL_ID,
-      history,
-      config: {
-        systemInstruction,
-        temperature,
-        responseMimeType: "application/json",
-        responseJsonSchema: rawSchema || (outputSchema ? zodToJsonSchema(outputSchema as any) : undefined),
-      },
+      systemInstruction,
     });
 
-    const response = await chat.sendMessage({
-      message: lastMessage.parts[0].text,
+    const generationConfig = {
+      temperature,
+      responseMimeType: "application/json",
+      responseJsonSchema: rawSchema || (outputSchema ? zodToJsonSchema(outputSchema as any) : undefined),
+    };
+
+    const result = await model.generateContent({
+      contents: messages.map(m => ({
+        role: m.role === "user" ? "user" : "model",
+        parts: m.parts,
+      })),
+      generationConfig,
     });
 
-    const text = response.text;
+    const response = result.response;
+    const text = response.text();
+    
     if (!text) {
       throw new Error("No text returned from Gemini API");
     }
-    const parsedObject = JSON.parse(text) as T;
 
-    return {
-      object: parsedObject,
-      raw: response,
-    };
+    try {
+      const parsedObject = JSON.parse(text) as T;
+      return {
+        object: parsedObject,
+        raw: response,
+      };
+    } catch (parseError) {
+      console.error("[JSON Parse Error] Raw text:", text);
+      throw parseError;
+    }
   } catch (error: any) {
     console.error("[Gemini generateObject Error]:", error);
     throw error;
