@@ -1,3 +1,5 @@
+<img src="./public/logo.png" alt="CodeBeaver Logo" width="120" height="120" align="left" style="margin-right: 20px; margin-bottom: 20px;">
+
 # CodeBeaver AI - Your AI Senior Software Engineer
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
