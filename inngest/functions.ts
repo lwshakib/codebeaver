@@ -187,9 +187,13 @@ export const generateReviewTask = inngest.createFunction(
       // Extract file paths from the diff (basic parsing)
       const fileMatch = diff.match(/^\+\+\+ b\/(.+)$/gm);
       const files = fileMatch ? fileMatch.map(m => m.replace('+++ b/', '')) : [];
-      const fileList = files.length > 0 ? `\n\n**Files being analyzed:**\n- ${files.join('\n- ')}` : "";
       
-      const statusMessage = `🦫 **CodeBeaver AI** is now analyzing your changes. I'm generating a summary and code review... please wait a moment!${fileList}`;
+      let fileListSection = "";
+      if (files.length > 0) {
+        fileListSection = `\n\n<details>\n<summary><b>Files being analyzed (${files.length})</b></summary>\n\n- ${files.join('\n- ')}\n</details>`;
+      }
+      
+      const statusMessage = `🦫 **CodeBeaver AI** is now analyzing your changes. I'm generating a summary and code review... please wait a moment!${fileListSection}`;
       
       await postPullRequestComment(token, owner, repository, prNumber, statusMessage);
     });
