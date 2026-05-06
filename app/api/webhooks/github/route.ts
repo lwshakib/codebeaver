@@ -29,8 +29,10 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       if (action === "opened" || action === "synchronize") {
         console.log(`Triggering review for ${repoFullName} #${prNumber}`);
         
+        const installationId = body.installation?.id;
+        
         // We use the helper which sends an Inngest event
-        await reviewPullRequest(owner, repoName, prNumber);
+        await reviewPullRequest(owner, repoName, prNumber, installationId);
       }
     }
 
