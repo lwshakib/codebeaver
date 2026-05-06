@@ -269,10 +269,10 @@ ${diff}
           findings: z.array(z.object({
             path: z.string().describe("File path."),
             line: z.number().describe("Line number in the final file version."),
-            priority: z.enum(["High Priority", "Medium Priority", "Low Priority"]),
-            explanation: z.string().describe("Description of the issue and its impact."),
-            originalSnippet: z.string().describe("The exact code snippet from the diff to be replaced."),
-            suggestedCode: z.string().describe("The corrected code block.")
+            priority: z.enum(["High Priority", "Medium Priority", "Low Priority", "Positive Note"]),
+            explanation: z.string().describe("Description of the issue or praise for the implementation."),
+            originalSnippet: z.string().optional().describe("The exact code snippet from the diff to be replaced."),
+            suggestedCode: z.string().optional().describe("The corrected code block.")
           }))
         }),
         systemInstruction: PR_REVIEW_PROMPT,
@@ -290,9 +290,10 @@ ${diff}
       const validFindings = review.findings.filter((f: any) => f.path && f.line);
 
       const inlineComments = validFindings.map((f: any) => {
-        let commentBody = `**${f.priority}**\n\n${f.explanation}`;
+        const priorityEmoji = f.priority === "Positive Note" ? "✅" : "⚠️";
+        let commentBody = `### ${priorityEmoji} ${f.priority}\n\n${f.explanation}`;
         
-        if (f.suggestedCode) {
+        if (f.suggestedCode && f.originalSnippet) {
           commentBody += `\n\n**Suggested Change:**\n\`\`\`suggestion\n${f.suggestedCode}\n\`\`\``;
         }
 
