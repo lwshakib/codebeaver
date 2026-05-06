@@ -2,7 +2,7 @@ import { env } from "@/lib/env";
 import { Octokit } from "@octokit/rest";
 import { App } from "octokit";
 import { Pinecone as PineconeClient } from "@pinecone-database/pinecone";
-import { generateEmbeddings, generateBatchEmbeddings } from "@/llm";
+import { generateEmbeddings } from "@/llm";
 import prisma from "@/lib/prisma";
 import { inngest } from "./client";
 
@@ -126,7 +126,7 @@ export async function indexCodebase(
 
   try {
     const allContents = preparedFiles.map((f) => f.truncatedContent);
-    const results = await generateBatchEmbeddings(allContents);
+    const results = await Promise.all(allContents.map(text => generateEmbeddings(text, "document")));
 
     results.forEach((embedding, index) => {
       const file = preparedFiles[index];
