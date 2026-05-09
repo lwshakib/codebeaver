@@ -9,8 +9,9 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
     const body = await req.json();
     const event = req.headers.get("x-github-event");
+    const deliveryId = req.headers.get("x-github-delivery") || undefined;
 
-    console.log(`Received GitHub event: ${event}`);
+    console.log(`Received GitHub event: ${event} (Delivery ID: ${deliveryId})`);
 
     // Handle initial handshake
     if (event === "ping") {
@@ -32,7 +33,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         const installationId = body.installation?.id;
         
         // We use the helper which sends an Inngest event
-        await reviewPullRequest(owner, repoName, prNumber, installationId);
+        await reviewPullRequest(owner, repoName, prNumber, installationId, deliveryId);
       }
     }
 

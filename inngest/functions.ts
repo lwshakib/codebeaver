@@ -77,11 +77,36 @@ export const generateReviewTask = inngest.createFunction(
     triggers: { event: "pr.review.requested" }
   },
   async ({ event, step }) => {
-    const { repository, owner, userId, prNumber } = event.data;
+    const { repository, owner, prNumber, installationId } = event.data;
     
-    const token = await step.run("get-token", async () => {
+    const { token, userId } = await step.run("get-token-and-user", async () => {
+      let resolvedUserId = event.data.userId;
+      
+      // 1. Resolve User ID if missing
+      if (!resolvedUserId) {
+        const dbRepo = await prisma.repository.findFirst({
+          where: { owner, name: repository },
+        });
+
+        if (dbRepo) {
+          resolvedUserId = dbRepo.userId;
+        } else if (installationId) {
+          const user = await prisma.user.findFirst({
+            where: { githubInstallationId: String(installationId) },
+          });
+          if (user) {
+            resolvedUserId = user.id;
+          }
+        }
+      }
+
+      if (!resolvedUserId) {
+        throw new Error(`Could not determine user for ${owner}/${repository}. Ensure the repository is connected.`);
+      }
+
+      // 2. Fetch User and Token
       const user = await prisma.user.findUnique({
-        where: { id: userId },
+        where: { id: resolvedUserId },
       });
 
       let token: string | undefined;
@@ -92,7 +117,7 @@ export const generateReviewTask = inngest.createFunction(
       } else {
         const account = await prisma.account.findFirst({
           where: {
-            userId,
+            userId: resolvedUserId,
             providerId: "github",
           },
         });
@@ -103,7 +128,7 @@ export const generateReviewTask = inngest.createFunction(
         throw new Error("No GitHub access token or installation ID found");
       }
 
-      return token;
+      return { token, userId: resolvedUserId };
     });
 
     await step.run("ensure-indexed", async () => {

@@ -183,86 +183,26 @@ export async function retrieveContext(
     .filter((content): content is string => Boolean(content));
 }
 
+/**
+ * Triggers a Pull Request review via Inngest.
+ * Optimized to be extremely fast to prevent GitHub webhook timeouts.
+ */
 export async function reviewPullRequest(
   owner: string,
   repo: string,
   prNumber: number,
-  installationId?: number
+  installationId?: number,
+  eventId?: string
 ) {
   try {
-    const repository = await prisma.repository.findFirst({
-      where: {
-        owner,
-        name: repo,
-      },
-      include: {
-        user: {
-          include: {
-            accounts: {
-              where: {
-                providerId: "github",
-              },
-            },
-          },
-        },
-      },
-    });
-
-    let userId: string;
-    let githubInstallationId: string | null = null;
-    let githubAccount: any = null;
-
-    if (!repository) {
-      // Auto-discovery: find user by installation ID if repo is not in DB
-      if (!installationId) {
-        throw new Error(`Repository ${owner}/${repo} not found in database and no installation ID provided.`);
-      }
-
-      const user = await prisma.user.findFirst({
-        where: {
-          githubInstallationId: String(installationId),
-        },
-        include: {
-          accounts: {
-            where: {
-              providerId: "github",
-            },
-          },
-        },
-      });
-
-      if (!user) {
-        throw new Error(`No user found for installation ID ${installationId}. Please ensure you have signed up.`);
-      }
-
-      userId = user.id;
-      githubInstallationId = user.githubInstallationId;
-      githubAccount = user.accounts[0];
-    } else {
-      userId = repository.userId;
-      githubInstallationId = repository.user.githubInstallationId;
-      githubAccount = repository.user.accounts[0];
-    }
-
-    let token: string | undefined;
-
-    if (githubInstallationId) {
-      token = await getGitHubInstallationToken(githubInstallationId);
-    } else {
-      token = githubAccount?.accessToken || undefined;
-    }
-
-    if (!token) {
-      throw new Error("No GitHub access token or installation ID found");
-    }
-
     await inngest.send({
+      id: eventId,
       name: "pr.review.requested",
       data: {
         owner,
         repository: repo,
         prNumber,
-        userId,
+        installationId,
       },
     });
 
