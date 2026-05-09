@@ -193,7 +193,7 @@ export const generateReviewTask = inngest.createFunction(
         fileListSection = `\n\n<details>\n<summary><b>Files being analyzed (${files.length})</b></summary>\n\n- ${files.join('\n- ')}\n</details>`;
       }
       
-      const statusMessage = `🦫 **CodeBeaver AI** is now analyzing your changes. I'm generating a summary and code review... please wait a moment!${fileListSection}`;
+      const statusMessage = `**CodeBeaver AI** is now analyzing your changes. I'm generating a summary and code review... please wait a moment!${fileListSection}`;
       
       await postPullRequestComment(token, owner, repository, prNumber, statusMessage);
     });
