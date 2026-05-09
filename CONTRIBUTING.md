@@ -95,9 +95,6 @@ nano .env  # or use your preferred editor
 # Run Prisma migrations
 pnpm run db:migrate
 
-# (Optional) Seed the database with test data
-pnpm run db:seed
-
 # View database in Prisma Studio
 pnpm run db:studio
 ```
@@ -176,8 +173,6 @@ git checkout -b improve/your-improvement-description
 # Run ESLint to check for issues
 pnpm run lint
 
-# Automatically fix fixable issues
-pnpm run lint:fix
 ```
 
 ### Manual Testing
@@ -296,7 +291,6 @@ git push origin feature/your-feature-name --force-with-lease
 
    ```bash
    pnpm run lint
-   pnpm run lint:fix
    ```
 
 3. **Test thoroughly** - Run the dev server and manually test your changes
@@ -568,12 +562,10 @@ pnpm run dev
 
 # Run linter
 pnpm run lint
-pnpm run lint:fix
 
 # Database commands
 pnpm run db:migrate      # Run migrations
 pnpm run db:studio       # Open Prisma Studio
-pnpm run db:seed         # Seed database
 pnpm run db:reset        # Reset database (WARNING: destructive)
 pnpm run db:generate     # Generate Prisma client
 
@@ -582,7 +574,7 @@ pnpm run build
 pnpm run start
 
 # Type checking
-pnpm run type-check
+pnpm run typecheck
 ```
 
 ### Key Project Structure

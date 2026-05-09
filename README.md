@@ -112,11 +112,6 @@ Run Prisma migrations to set up your database schema:
 pnpm run db:migrate
 ```
 
-For development with database seeding (if available):
-
-```bash
-pnpm run db:seed
-```
 
 ### Step 5: Generate Prisma Client
 
@@ -291,11 +286,6 @@ Run ESLint to check for code quality issues:
 pnpm run lint
 ```
 
-Fix linting issues automatically:
-
-```bash
-pnpm run lint:fix
-```
 
 ## Project Structure
 
@@ -346,6 +336,33 @@ codebeaver/
 ```
 
 ## How It Works
+
+### System Architecture
+
+```mermaid
+graph TD
+    User([GitHub User]) -->|Opens/Updates PR| GitHub[GitHub Webhook]
+    GitHub -->|Event| API[Next.js API Route]
+    API -->|Trigger| Inngest[Inngest Workflow Engine]
+    
+    subgraph Workflows [Inngest Background Workflows]
+        Index[Repository Indexing]
+        Review[PR Analysis & Review]
+    end
+    
+    Inngest --> Index
+    Inngest --> Review
+    
+    Index -->|Embeddings| Gemini[Google Gemini LLM]
+    Gemini -->|Vectors| Pinecone[(Pinecone Vector DB)]
+    
+    Review -->|Fetch Context| Pinecone
+    Review -->|Generate Review| Gemini
+    Review -->|Post Comment/Review| GitHub
+    
+    Index -.->|Store Status| DB[(PostgreSQL Database)]
+    Review -.->|Save Historical Reviews| DB
+```
 
 ### 1. **Repository Indexing**
 

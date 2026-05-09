@@ -16,7 +16,8 @@
     "db:studio": "prisma studio",
     "db:reset": "prisma migrate reset",
     "bucket:setup": "tsx scripts/bucket-setup.ts",
-    "bucket:teardown": "tsx scripts/bucket-teardown.ts"
+    "bucket:teardown": "tsx scripts/bucket-teardown.ts",
+    "inngest:dev": "inngest-cli@latest dev"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1042.0",
