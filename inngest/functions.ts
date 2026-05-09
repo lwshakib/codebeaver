@@ -8,6 +8,7 @@ import {
   createPullRequestReview,
   retrieveContext,
   updatePullRequestDescription,
+  injectLineNumbersIntoDiff,
 } from "./helpers";
 import { 
   generateText, 
@@ -182,6 +183,8 @@ export const generateReviewTask = inngest.createFunction(
       }
     );
 
+    const numberedDiff = injectLineNumbersIntoDiff(diff);
+
     // Post an initial status comment to let the user know work has started
     await step.run("post-initial-status", async () => {
       // Extract file paths from the diff (basic parsing)
@@ -206,7 +209,7 @@ export const generateReviewTask = inngest.createFunction(
           messages: [
             { 
               role: "user", 
-              parts: [{ text: `PR Title: ${title}\n\nDiff:\n${diff}` }] 
+              parts: [{ text: `PR Title: ${title}\n\nDiff:\n${numberedDiff}` }] 
             },
           ],
         });
@@ -243,7 +246,7 @@ ${finalContext}
 ---
 
 ### Code Changes
-${diff}
+${numberedDiff}
 `;
 
     const summary = await step.run("generate-summary", async () => {
@@ -264,6 +267,7 @@ ${diff}
       overview: string;
       findings: {
         path: string;
+        startLine?: number;
         line: number;
         priority: string;
         explanation: string;
@@ -273,7 +277,7 @@ ${diff}
     }
 
     const review = await step.run("generate-review-findings", async () => {
-      const userPrompt = `PR Title: ${title}\n\nPR Description: ${description}\n\nDiff:\n${diff}\n\nContext:\n${context}`;
+      const userPrompt = `PR Title: ${title}\n\nPR Description: ${description}\n\nDiff:\n${numberedDiff}\n\nContext:\n${context}`;
       
       const reviewSchema = {
         type: "object",
@@ -288,7 +292,8 @@ ${diff}
               type: "object",
               properties: {
                 path: { type: "string", description: "File path." },
-                line: { type: "number", description: "Line number in the final file version." },
+                startLine: { type: "number", description: "The starting line number if suggesting a multi-line change." },
+                line: { type: "number", description: "The exact line number (or ending line number for multi-line) from the [Line X] markers." },
                 priority: { 
                   type: "string", 
                   enum: ["High Priority", "Medium Priority", "Low Priority", "Positive Note"] 
@@ -328,11 +333,18 @@ ${diff}
           commentBody += `\n\n**Suggested Change:**\n\`\`\`suggestion\n${f.suggestedCode}\n\`\`\``;
         }
 
-        return {
+        const commentObj: any = {
           path: f.path,
           line: f.line,
           body: commentBody,
         };
+
+        if (f.startLine && f.startLine < f.line) {
+          commentObj.start_line = f.startLine;
+          commentObj.start_side = "RIGHT";
+        }
+
+        return commentObj;
       });
 
       await createPullRequestReview(

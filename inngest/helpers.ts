@@ -338,7 +338,7 @@ export async function createPullRequestReview(
   prNumber: number,
   commitId: string,
   body: string,
-  comments: { path: string; line: number; body: string }[]
+  comments: { path: string; line: number; start_line?: number; start_side?: string; body: string }[]
 ) {
   const octokit = new Octokit({
     auth: token,
@@ -352,12 +352,19 @@ export async function createPullRequestReview(
       commit_id: commitId,
       body,
       event: "COMMENT",
-      comments: comments.map((c) => ({
-        path: c.path,
-        line: c.line,
-        body: c.body,
-        side: "RIGHT",
-      })),
+      comments: comments.map((c) => {
+        const payload: any = {
+          path: c.path,
+          line: c.line,
+          body: c.body,
+          side: "RIGHT",
+        };
+        if (c.start_line) {
+          payload.start_line = c.start_line;
+          payload.start_side = c.start_side || "RIGHT";
+        }
+        return payload;
+      }),
     });
   } catch (error) {
     console.error("Failed to create batched review. Falling back to summary only.", error);
@@ -383,5 +390,39 @@ export async function updatePullRequestDescription(
     pull_number: prNumber,
     body,
   });
+}
+
+/**
+ * Injects explicit line numbers into a raw unified diff.
+ * This helps the LLM accurately target lines for inline comments and code suggestions.
+ */
+export function injectLineNumbersIntoDiff(rawDiff: string): string {
+  const lines = rawDiff.split("\n");
+  let currentLineNumber = 0;
+  let result: string[] = [];
+
+  for (const line of lines) {
+    if (line.startsWith("@@ ")) {
+      const match = line.match(/@@ -\d+(?:,\d+)? \+(\d+)(?:,\d+)? @@/);
+      if (match) {
+        currentLineNumber = parseInt(match[1], 10);
+      }
+      result.push(line);
+    } else if (line.startsWith("---") || line.startsWith("+++")) {
+      result.push(line);
+    } else if (line.startsWith("+")) {
+      result.push(`[Line ${currentLineNumber}] ${line}`);
+      currentLineNumber++;
+    } else if (line.startsWith("-")) {
+      result.push(line);
+    } else if (line.startsWith(" ") || line === "") {
+      result.push(`[Line ${currentLineNumber}] ${line}`);
+      currentLineNumber++;
+    } else {
+      result.push(line);
+    }
+  }
+
+  return result.join("\n");
 }
 
