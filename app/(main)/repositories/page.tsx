@@ -87,7 +87,7 @@ export default async function RepositoriesPage({
   const totalPages = Math.ceil(totalCount / perPage);
 
   return (
-    <div className="space-y-8 max-w-6xl">
+    <div className="space-y-8 max-w-6xl mx-auto">
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Repositories</h1>
